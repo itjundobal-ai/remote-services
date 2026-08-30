@@ -64,13 +64,32 @@
       <div class="booking-grid">
         <div>
           <div class="section-heading"><span>Book / Request Service</span><h2>Tell us what you need</h2></div>
-          <p>Your booking will be sent to our service dashboard after submission. For Home Service, you may optionally share your current location so we can estimate travel distance.</p>
+          <p>Your booking will be sent to our service dashboard after submission. Choose how you want us to contact you: Messenger or phone. For Home Service, you may optionally share your current location.</p>
           <div class="notice"><strong>Privacy:</strong> Do not put passwords, PINs or banking details in this form. Location is only requested when you choose to share it.</div>
         </div>
 
         <form id="bookingForm" class="form">
           <label>Full name<input id="name" name="name" type="text" maxlength="100" required placeholder="Your name" /></label>
-          <label>Contact number<input id="contact" name="contact" type="tel" maxlength="30" required placeholder="09XXXXXXXXX" /></label>
+
+          <label>Preferred contact method
+            <select id="contactMethod" name="contactMethod" required>
+              <option value="">Choose one</option>
+              <option value="Messenger">Messenger</option>
+              <option value="Phone">Phone number</option>
+            </select>
+          </label>
+
+          <div id="phoneContactBox" hidden>
+            <label>Phone number<input id="contact" name="contact" type="tel" maxlength="30" placeholder="09XXXXXXXXX" /></label>
+          </div>
+
+          <div id="messengerContactBox" hidden>
+            <label>Messenger / Facebook name or profile link
+              <input id="messengerContact" name="messengerContact" type="text" maxlength="200" placeholder="Example: Juan Dela Cruz or https://facebook.com/username" />
+            </label>
+            <small>Enter the Facebook/Messenger name or profile link you want us to use when contacting you.</small>
+          </div>
+
           <label>Email (optional)<input id="email" name="email" type="email" maxlength="120" placeholder="you@example.com" /></label>
           <label>Service<select id="service" name="service" required>
             <option value="">Select a service</option><option>PC / Laptop Check-up</option><option>Windows / Software Setup</option><option>Printer / Wi-Fi Troubleshooting</option><option>Resume / CV / Documents</option><option>Poster / Menu / Layout</option><option>One-page Business Website</option><option>Other Digital Request</option>
