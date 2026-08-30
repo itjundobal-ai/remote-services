@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex,nofollow" />
+  <title>Remote Services Admin</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="admin-shell">
+    <div class="container">
+      <div class="admin-top">
+        <div><div class="brand">REMOTE SERVICES</div><h1 style="font-size:2.2rem;margin:.4rem 0">Booking Dashboard</h1></div>
+        <a class="btn btn-secondary" href="/">Back to Website</a>
+      </div>
+
+      <section id="loginPanel" class="admin-panel admin-login">
+        <h2>Admin Access</h2>
+        <p>Enter the private admin key configured in Cloudflare.</p>
+        <label>Admin key<input id="adminKey" type="password" autocomplete="current-password" placeholder="Private admin key" /></label>
+        <button id="loginBtn" class="btn full" type="button">Open Dashboard</button>
+        <div id="loginMessage" class="form-message"></div>
+      </section>
+
+      <section id="dashboardPanel" class="admin-panel" hidden>
+        <div class="admin-top">
+          <div><h2 style="margin:0">Bookings</h2><div id="bookingCount" class="booking-meta"></div></div>
+          <div class="booking-actions"><button id="refreshBtn" type="button">Refresh</button><button id="logoutBtn" type="button">Lock</button></div>
+        </div>
+        <div id="bookingList" class="booking-list"></div>
+      </section>
+    </div>
+  </main>
+  <script src="admin.js"></script>
+</body>
+</html>
