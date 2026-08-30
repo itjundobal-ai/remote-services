@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Remote Services for PC, laptop, printer, Wi-Fi, documents, design, and simple websites." />
+  <title>Remote Services</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="hero">
+    <nav class="nav container">
+      <div class="brand">REMOTE SERVICES</div>
+      <a class="btn btn-small" href="#booking">Book Service</a>
+    </nav>
+
+    <div class="container hero-grid">
+      <div>
+        <span class="badge">FIRST 10 CUSTOMERS • REMOTE CHECK-UP ₱199</span>
+        <h1>Tech help and digital services, wherever you are.</h1>
+        <p class="lead">PC • Laptop • Printer • Wi-Fi • Software • Resume • Design • Website</p>
+        <div class="hero-actions">
+          <a class="btn" href="#booking">Request a Service</a>
+          <a class="btn btn-secondary" href="#services">View Prices</a>
+        </div>
+        <p class="trust">Remote access is only done with the customer’s clear permission.</p>
+      </div>
+      <div class="hero-card">
+        <h3>Available Services</h3>
+        <ul>
+          <li>Remote troubleshooting</li>
+          <li>Windows & software setup</li>
+          <li>Printer & Wi-Fi support</li>
+          <li>Resume & document work</li>
+          <li>Posters, menus & layouts</li>
+          <li>Simple business websites</li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="services" class="section container">
+      <div class="section-heading">
+        <span>Services & Pricing</span>
+        <h2>Affordable help for everyday tech and digital needs</h2>
+      </div>
+
+      <div class="cards">
+        <article class="card">
+          <h3>PC / Laptop Check-up</h3>
+          <p>Slow computer, errors, cleanup, basic diagnosis and troubleshooting.</p>
+          <strong>₱200–₱300</strong>
+        </article>
+        <article class="card">
+          <h3>Windows / Software Setup</h3>
+          <p>Installation, setup, updates, configuration and common software assistance.</p>
+          <strong>₱300–₱500</strong>
+        </article>
+        <article class="card">
+          <h3>Printer / Wi-Fi Troubleshooting</h3>
+          <p>Connection issues, setup, driver problems, network and printing assistance.</p>
+          <strong>₱300–₱500</strong>
+        </article>
+        <article class="card">
+          <h3>Home Service Add-on</h3>
+          <p>For problems that require an actual visit and cannot be solved remotely.</p>
+          <strong>+₱100–₱300</strong>
+        </article>
+        <article class="card">
+          <h3>Resume / Poster / Menu</h3>
+          <p>Resume, CV, biodata, application letter, poster, menu and simple layout work.</p>
+          <strong>₱150–₱400</strong>
+        </article>
+        <article class="card">
+          <h3>One-page Business Website</h3>
+          <p>Simple mobile-friendly business page for services, products and contact details.</p>
+          <strong>₱800–₱1,500</strong>
+        </article>
+        <article class="card wide">
+          <h3>Other Digital Requests</h3>
+          <p>PDF editing, Word/Excel formatting, file conversion, Facebook Page setup and other requests. Ask first and we’ll confirm if we can do it.</p>
+          <strong>Ask for quote</strong>
+        </article>
+      </div>
+    </section>
+
+    <section class="section alt">
+      <div class="container steps-wrap">
+        <div class="section-heading">
+          <span>How It Works</span>
+          <h2>Simple and transparent</h2>
+        </div>
+        <div class="steps">
+          <div class="step"><b>1</b><h3>Send your request</h3><p>Tell us what device or digital task you need help with.</p></div>
+          <div class="step"><b>2</b><h3>We confirm the price</h3><p>You’ll know the expected cost before work starts.</p></div>
+          <div class="step"><b>3</b><h3>Remote or home service</h3><p>Remote support only happens with your permission. Home service is available when needed.</p></div>
+          <div class="step"><b>4</b><h3>Job completed</h3><p>We confirm the result with you before closing the request.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="booking" class="section container">
+      <div class="booking-grid">
+        <div>
+          <div class="section-heading">
+            <span>Book / Request Service</span>
+            <h2>Tell us what you need</h2>
+          </div>
+          <p>Fill in the form. This first version prepares your request on your device. We’ll connect it to our online booking database in the next setup step.</p>
+        </div>
+
+        <form id="bookingForm" class="form">
+          <label>Full name
+            <input id="name" name="name" type="text" required placeholder="Your name" />
+          </label>
+          <label>Contact number
+            <input id="contact" name="contact" type="tel" required placeholder="09XXXXXXXXX" />
+          </label>
+          <label>Service
+            <select id="service" name="service" required>
+              <option value="">Select a service</option>
+              <option>PC / Laptop Check-up</option>
+              <option>Windows / Software Setup</option>
+              <option>Printer / Wi-Fi Troubleshooting</option>
+              <option>Resume / CV / Documents</option>
+              <option>Poster / Menu / Layout</option>
+              <option>One-page Business Website</option>
+              <option>Other Digital Request</option>
+            </select>
+          </label>
+          <label>Service type
+            <select id="serviceType" name="serviceType" required>
+              <option value="">Choose one</option>
+              <option>Remote Service</option>
+              <option>Home Service</option>
+              <option>Digital Work Only</option>
+            </select>
+          </label>
+          <label>Preferred schedule
+            <input id="schedule" name="schedule" type="datetime-local" />
+          </label>
+          <label>Describe the problem or request
+            <textarea id="details" name="details" rows="5" required placeholder="Example: Laptop is very slow after startup... or I need a resume for a job application."></textarea>
+          </label>
+          <label class="check">
+            <input id="consent" type="checkbox" required />
+            <span>I understand that any remote connection requires my explicit permission and I can end the session at any time.</span>
+          </label>
+          <button class="btn full" type="submit">Prepare Request</button>
+          <div id="formMessage" class="form-message" aria-live="polite"></div>
+        </form>
+      </div>
+    </section>
+
+    <section class="section faq alt">
+      <div class="container">
+        <div class="section-heading"><span>FAQ</span><h2>Before we start</h2></div>
+        <details><summary>Can every computer problem be fixed remotely?</summary><p>No. Hardware damage, some printer problems and physical network issues may require home service.</p></details>
+        <details><summary>Do you ask for passwords?</summary><p>Customers should not send passwords through the booking form. If a login is needed during support, the customer should enter it directly whenever possible.</p></details>
+        <details><summary>Can I request something not listed?</summary><p>Yes. Choose “Other Digital Request” and describe what you need. We will confirm first if we can do it.</p></details>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container footer-inner">
+      <div><strong>REMOTE SERVICES</strong><p>Practical tech and digital help.</p></div>
+      <a href="#booking">Request Service</a>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
