@@ -31,10 +31,28 @@ async function api(path = '', options = {}) {
 }
 
 function mapLink(item) {
-  if (item.latitude == null || item.longitude == null) return '';
+  if (item.service_type !== 'Home Service' || item.latitude == null || item.longitude == null) return '';
   const lat = encodeURIComponent(item.latitude);
   const lng = encodeURIComponent(item.longitude);
   return `<a target="_blank" rel="noopener" href="https://www.google.com/maps?q=${lat},${lng}">Open Location</a>`;
+}
+
+function contactActions(item) {
+  const method = item.contact_method || (item.contact ? 'Phone' : 'Messenger');
+  const actions = [];
+
+  if (method === 'Phone' && item.contact) {
+    actions.push(`<a href="tel:${encodeURIComponent(item.contact)}">Call</a>`);
+  }
+
+  if (method === 'Messenger' && item.messenger_contact) {
+    const value = String(item.messenger_contact).trim();
+    if (/^https?:\/\//i.test(value)) {
+      actions.push(`<a target="_blank" rel="noopener" href="${escapeHtml(value)}">Messenger</a>`);
+    }
+  }
+
+  return actions.join('');
 }
 
 function render(bookings) {
@@ -44,11 +62,18 @@ function render(bookings) {
     return;
   }
 
-  bookingList.innerHTML = bookings.map(item => `
+  bookingList.innerHTML = bookings.map(item => {
+    const method = item.contact_method || (item.contact ? 'Phone' : 'Messenger');
+    const contactDetail = method === 'Messenger'
+      ? (item.messenger_contact || 'Not provided')
+      : (item.contact || 'Not provided');
+
+    return `
     <article class="booking-item" data-id="${item.id}">
       <div class="booking-meta"><span>${escapeHtml(item.reference)}</span><span>•</span><span>${escapeHtml(formatDate(item.created_at))}</span><span>•</span><span class="status">${escapeHtml(item.status)}</span></div>
       <h3>${escapeHtml(item.name)} — ${escapeHtml(item.service)}</h3>
-      <p><strong>Contact:</strong> ${escapeHtml(item.contact)}${item.email ? ` · ${escapeHtml(item.email)}` : ''}<br>
+      <p><strong>Preferred contact:</strong> ${escapeHtml(method)}<br>
+      <strong>Contact detail:</strong> ${escapeHtml(contactDetail)}${item.email ? `<br><strong>Email:</strong> ${escapeHtml(item.email)}` : ''}<br>
       <strong>Type:</strong> ${escapeHtml(item.service_type)}<br>
       <strong>Preferred schedule:</strong> ${escapeHtml(formatDate(item.preferred_schedule))}</p>
       <p>${escapeHtml(item.details).replaceAll('\n','<br>')}</p>
@@ -56,11 +81,12 @@ function render(bookings) {
         <select class="statusSelect" data-id="${item.id}">
           ${['New','Contacted','Scheduled','In Progress','Done','Cancelled'].map(s => `<option ${s === item.status ? 'selected' : ''}>${s}</option>`).join('')}
         </select>
+        ${contactActions(item)}
         ${mapLink(item)}
-        <a href="tel:${encodeURIComponent(item.contact)}">Call</a>
       </div>
     </article>
-  `).join('');
+  `;
+  }).join('');
 
   document.querySelectorAll('.statusSelect').forEach(select => {
     select.addEventListener('change', async () => {
