@@ -1,0 +1,39 @@
+name: Build Remote Services Inbox APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'android-inbox/**'
+      - '.github/workflows/build-inbox-apk.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '9.6.1'
+
+      - name: Build debug APK
+        working-directory: android-inbox
+        run: gradle --no-daemon :app:assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: remote-services-inbox-debug-apk
+          path: android-inbox/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
