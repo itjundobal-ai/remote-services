@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#071018" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="description" content="Remote Services dedicated booking inbox." />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="stylesheet" href="inbox.css" />
+  <title>Remote Services Inbox</title>
+</head>
+<body>
+  <main class="app-shell">
+    <section id="loginView" class="screen login-screen">
+      <div class="brand-badge">RS</div>
+      <span class="eyebrow">REMOTE SERVICES</span>
+      <h1>Inbox</h1>
+      <p class="muted">Owner access only. Enter your existing Admin Key once on this device.</p>
+      <form id="loginForm" class="card form-card">
+        <label>Admin Key<input id="adminKey" type="password" autocomplete="current-password" required placeholder="Enter Admin Key" /></label>
+        <button class="primary-btn" type="submit">OPEN INBOX</button>
+        <div id="loginMessage" class="message" aria-live="polite"></div>
+      </form>
+    </section>
+
+    <section id="inboxView" class="screen inbox-screen" hidden>
+      <header class="topbar">
+        <div>
+          <span class="eyebrow">REMOTE SERVICES</span>
+          <h1>Inbox</h1>
+        </div>
+        <div class="top-actions">
+          <span id="countBadge" class="count-badge">0</span>
+          <button id="refreshBtn" class="icon-btn" type="button" aria-label="Refresh">↻</button>
+        </div>
+      </header>
+      <div id="syncStatus" class="sync-status">Connecting…</div>
+      <div id="bookingList" class="booking-list"></div>
+      <div id="emptyState" class="empty-state" hidden>
+        <div class="empty-icon">✦</div>
+        <h2>No bookings yet</h2>
+        <p>New repair requests will appear here automatically.</p>
+      </div>
+    </section>
+
+    <section id="detailView" class="screen detail-screen" hidden>
+      <header class="detail-topbar">
+        <button id="backBtn" class="back-btn" type="button">← <span>Back</span></button>
+        <span class="detail-ref" id="detailRef"></span>
+      </header>
+      <article id="detailCard" class="detail-card"></article>
+    </section>
+  </main>
+
+  <template id="bookingTemplate">
+    <button class="booking-item" type="button">
+      <div class="booking-rank"></div>
+      <div class="booking-main">
+        <strong class="booking-name"></strong>
+        <span class="booking-meta"></span>
+        <span class="booking-problem"></span>
+      </div>
+      <div class="booking-side">
+        <span class="new-dot" hidden></span>
+        <span class="chevron">›</span>
+      </div>
+    </button>
+  </template>
+
+  <script src="inbox.js"></script>
+</body>
+</html>
