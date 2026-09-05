@@ -5,10 +5,17 @@ const loginBtn = document.getElementById('loginBtn');
 const loginMessage = document.getElementById('loginMessage');
 const bookingList = document.getElementById('bookingList');
 const bookingCount = document.getElementById('bookingCount');
+const bookingStats = document.getElementById('bookingStats');
+const searchInput = document.getElementById('searchInput');
+const statusFilter = document.getElementById('statusFilter');
+const typeFilter = document.getElementById('typeFilter');
 const refreshBtn = document.getElementById('refreshBtn');
 const logoutBtn = document.getElementById('logoutBtn');
 
 let adminKey = sessionStorage.getItem('remote_services_admin_key') || '';
+let allBookings = [];
+
+const STATUSES = ['New', 'Contacted', 'Scheduled', 'In Progress', 'Done', 'Cancelled'];
 
 const escapeHtml = (value) => String(value ?? '')
   .replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
@@ -30,11 +37,31 @@ async function api(path = '', options = {}) {
   return data;
 }
 
+function renderStats(bookings) {
+  const counts = Object.fromEntries(STATUSES.map(status => [status, 0]));
+  bookings.forEach(item => {
+    if (counts[item.status] !== undefined) counts[item.status]++;
+  });
+  bookingStats.innerHTML = STATUSES.map(status => `
+    <button type="button" class="stat-card" data-stat-status="${escapeHtml(status)}">
+      <span>${escapeHtml(status)}</span><strong>${counts[status]}</strong>
+    </button>
+  `).join('');
+
+  bookingStats.querySelectorAll('[data-stat-status]').forEach(button => {
+    button.addEventListener('click', () => {
+      statusFilter.value = button.dataset.statStatus;
+      applyFilters();
+    });
+  });
+}
+
 function mapLink(item) {
   if (item.service_type !== 'Home Service' || item.latitude == null || item.longitude == null) return '';
   const lat = encodeURIComponent(item.latitude);
   const lng = encodeURIComponent(item.longitude);
-  return `<a target="_blank" rel="noopener" href="https://www.google.com/maps?q=${lat},${lng}">Open Location</a>`;
+  const accuracy = item.accuracy ? ` (${escapeHtml(item.accuracy)}m accuracy)` : '';
+  return `<a target="_blank" rel="noopener" href="https://www.google.com/maps?q=${lat},${lng}">Open Location${accuracy}</a>`;
 }
 
 function contactActions(item) {
@@ -56,9 +83,9 @@ function contactActions(item) {
 }
 
 function render(bookings) {
-  bookingCount.textContent = `${bookings.length} booking${bookings.length === 1 ? '' : 's'} loaded`;
+  bookingCount.textContent = `${bookings.length} matching booking${bookings.length === 1 ? '' : 's'}`;
   if (!bookings.length) {
-    bookingList.innerHTML = '<div class="empty">No bookings yet.</div>';
+    bookingList.innerHTML = '<div class="empty">No matching bookings.</div>';
     return;
   }
 
@@ -76,10 +103,10 @@ function render(bookings) {
       <strong>Contact detail:</strong> ${escapeHtml(contactDetail)}${item.email ? `<br><strong>Email:</strong> ${escapeHtml(item.email)}` : ''}<br>
       <strong>Type:</strong> ${escapeHtml(item.service_type)}<br>
       <strong>Preferred schedule:</strong> ${escapeHtml(formatDate(item.preferred_schedule))}</p>
-      <p>${escapeHtml(item.details).replaceAll('\n','<br>')}</p>
+      <p>${escapeHtml(item.details).replaceAll('\\n','<br>')}</p>
       <div class="booking-actions">
         <select class="statusSelect" data-id="${item.id}">
-          ${['New','Contacted','Scheduled','In Progress','Done','Cancelled'].map(s => `<option ${s === item.status ? 'selected' : ''}>${s}</option>`).join('')}
+          ${STATUSES.map(s => `<option ${s === item.status ? 'selected' : ''}>${s}</option>`).join('')}
         </select>
         ${contactActions(item)}
         ${mapLink(item)}
@@ -90,14 +117,14 @@ function render(bookings) {
 
   document.querySelectorAll('.statusSelect').forEach(select => {
     select.addEventListener('change', async () => {
-      const old = select.dataset.current || '';
+      const previous = select.dataset.current || select.value;
       select.disabled = true;
       try {
         await api('', { method: 'PATCH', body: JSON.stringify({ id: Number(select.dataset.id), status: select.value }) });
         await loadBookings();
       } catch (error) {
         alert(error.message);
-        if (old) select.value = old;
+        select.value = previous;
       } finally {
         select.disabled = false;
       }
@@ -106,10 +133,30 @@ function render(bookings) {
   });
 }
 
+function applyFilters() {
+  const term = searchInput.value.trim().toLowerCase();
+  const status = statusFilter.value;
+  const type = typeFilter.value;
+
+  const filtered = allBookings.filter(item => {
+    const haystack = [
+      item.reference, item.name, item.contact, item.messenger_contact,
+      item.email, item.service, item.service_type, item.details
+    ].join(' ').toLowerCase();
+    return (!term || haystack.includes(term))
+      && (!status || item.status === status)
+      && (!type || item.service_type === type);
+  });
+
+  renderStats(allBookings);
+  render(filtered);
+}
+
 async function loadBookings() {
   bookingList.innerHTML = '<div class="empty">Loading bookings...</div>';
   const data = await api();
-  render(data.bookings || []);
+  allBookings = Array.isArray(data.bookings) ? data.bookings : [];
+  applyFilters();
 }
 
 async function login() {
@@ -134,9 +181,13 @@ async function login() {
 
 loginBtn.addEventListener('click', login);
 adminKeyInput.addEventListener('keydown', e => { if (e.key === 'Enter') login(); });
+searchInput.addEventListener('input', applyFilters);
+statusFilter.addEventListener('change', applyFilters);
+typeFilter.addEventListener('change', applyFilters);
 refreshBtn.addEventListener('click', () => loadBookings().catch(e => alert(e.message)));
 logoutBtn.addEventListener('click', () => {
   adminKey = '';
+  allBookings = [];
   sessionStorage.removeItem('remote_services_admin_key');
   dashboardPanel.hidden = true;
   loginPanel.hidden = false;
