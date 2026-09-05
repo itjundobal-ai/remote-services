@@ -28,6 +28,21 @@
           <div><h2 style="margin:0">Bookings</h2><div id="bookingCount" class="booking-meta"></div></div>
           <div class="booking-actions"><button id="refreshBtn" type="button">Refresh</button><button id="logoutBtn" type="button">Lock</button></div>
         </div>
+
+        <div id="bookingStats" class="admin-stats"></div>
+
+        <div class="admin-filters">
+          <input id="searchInput" type="search" placeholder="Search name, reference, service, or contact..." autocomplete="off" />
+          <select id="statusFilter">
+            <option value="">All statuses</option>
+            <option>New</option><option>Contacted</option><option>Scheduled</option><option>In Progress</option><option>Done</option><option>Cancelled</option>
+          </select>
+          <select id="typeFilter">
+            <option value="">All service types</option>
+            <option>Remote Service</option><option>Home Service</option><option>Digital Work Only</option>
+          </select>
+        </div>
+
         <div id="bookingList" class="booking-list"></div>
       </section>
     </div>
