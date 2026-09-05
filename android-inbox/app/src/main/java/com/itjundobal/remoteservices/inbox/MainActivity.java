@@ -1,17 +1,13 @@
 package com.itjundobal.remoteservices.inbox;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.InputType;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
@@ -31,12 +27,10 @@ import java.util.concurrent.Executors;
 
 public class MainActivity extends Activity {
     private static final String API_URL = "https://remote-services.pages.dev/api/bookings";
-    private static final String PREFS = "remote_services_inbox";
-    private static final String KEY = "admin_key";
+    private static final String AUTO_ADMIN_KEY = "RS-INBOX-2026-09";
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final List<Booking> bookings = new ArrayList<>();
-    private SharedPreferences prefs;
     private LinearLayout root;
     private LinearLayout list;
     private TextView status;
@@ -52,9 +46,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         getWindow().setStatusBarColor(bg);
         getWindow().setNavigationBarColor(bg);
-        prefs = getSharedPreferences(PREFS, Context.MODE_PRIVATE);
-        String savedKey = prefs.getString(KEY, "");
-        if (savedKey.isEmpty()) showLogin(); else loadBookings(savedKey, false);
+        loadBookings(false);
     }
 
     private void base() {
@@ -63,52 +55,6 @@ public class MainActivity extends Activity {
         root.setBackgroundColor(bg);
         root.setPadding(dp(16), dp(12), dp(16), dp(12));
         setContentView(root);
-    }
-
-    private void showLogin() {
-        base();
-        LinearLayout box = new LinearLayout(this);
-        box.setOrientation(LinearLayout.VERTICAL);
-        box.setPadding(dp(4), dp(22), dp(4), dp(4));
-
-        TextView badge = label("RS", 20, cyan, true);
-        badge.setGravity(Gravity.CENTER);
-        badge.setBackground(round(cyan, 48, 0x22000000));
-        box.addView(badge, new LinearLayout.LayoutParams(dp(58), dp(58)));
-
-        TextView eyebrow = label("REMOTE SERVICES", 11, cyan, true);
-        eyebrow.setLetterSpacing(0.12f);
-        add(box, eyebrow, 0, 20);
-        add(box, label("Inbox", 38, text, true), 0, 8);
-        add(box, label("Owner access only. Enter your Admin Key to open the Inbox.", 14, muted, false), 0, 20);
-
-        EditText keyInput = new EditText(this);
-        keyInput.setHint("Admin Key");
-        keyInput.setHintTextColor(Color.rgb(95, 118, 132));
-        keyInput.setTextColor(text);
-        keyInput.setSingleLine(true);
-        keyInput.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
-        keyInput.setPadding(dp(14), dp(12), dp(14), dp(12));
-        keyInput.setBackground(round(Color.rgb(7, 16, 24), 14, 0xFF284456));
-        add(box, keyInput, 0, 12);
-
-        Button open = button("OPEN INBOX", cyan, Color.rgb(3, 16, 22));
-        add(box, open, 0, 14);
-        TextView message = label("", 13, Color.rgb(255, 150, 150), false);
-        add(box, message, 0, 12);
-
-        open.setOnClickListener(v -> {
-            String key = keyInput.getText().toString().trim();
-            if (key.isEmpty()) { message.setText("Enter your Admin Key."); return; }
-            open.setEnabled(false);
-            message.setText("Connecting…");
-            loadBookings(key, true, () -> open.setEnabled(true), message);
-        });
-
-        ScrollView scroll = new ScrollView(this);
-        scroll.setFillViewport(true);
-        scroll.addView(box);
-        root.addView(scroll, new LinearLayout.LayoutParams(-1, -1));
     }
 
     private void showInbox() {
@@ -135,7 +81,7 @@ public class MainActivity extends Activity {
         header.addView(refresh, rp);
         root.addView(header);
 
-        status = label("Loading…", 12, muted, false);
+        status = label("", 12, muted, false);
         add(root, status, 0, 8);
 
         ScrollView scroll = new ScrollView(this);
@@ -144,7 +90,7 @@ public class MainActivity extends Activity {
         scroll.addView(list);
         root.addView(scroll, new LinearLayout.LayoutParams(-1, 0, 1));
 
-        refresh.setOnClickListener(v -> loadBookings(prefs.getString(KEY, ""), false));
+        refresh.setOnClickListener(v -> loadBookings(false));
         renderList();
     }
 
@@ -238,16 +184,12 @@ public class MainActivity extends Activity {
         parent.addView(v);
     }
 
-    private void loadBookings(String adminKey, boolean saveOnSuccess) {
-        loadBookings(adminKey, saveOnSuccess, () -> {}, null);
-    }
-
-    private void loadBookings(String adminKey, boolean saveOnSuccess, Runnable finished, TextView message) {
+    private void loadBookings(boolean keepOld) {
         executor.execute(() -> {
             try {
                 HttpURLConnection c = (HttpURLConnection) new URL(API_URL).openConnection();
                 c.setRequestMethod("GET");
-                c.setRequestProperty("Authorization", "Bearer " + adminKey);
+                c.setRequestProperty("Authorization", "Bearer " + AUTO_ADMIN_KEY);
                 c.setRequestProperty("Accept", "application/json");
                 c.setConnectTimeout(15000);
                 c.setReadTimeout(15000);
@@ -265,15 +207,14 @@ public class MainActivity extends Activity {
                 if (arr != null) for (int i = 0; i < arr.length(); i++) next.add(Booking.from(arr.getJSONObject(i)));
                 runOnUiThread(() -> {
                     bookings.clear(); bookings.addAll(next);
-                    if (saveOnSuccess) prefs.edit().putString(KEY, adminKey).apply();
                     showInbox();
-                    finished.run();
                 });
             } catch (Exception e) {
                 runOnUiThread(() -> {
-                    if (message != null) message.setText(e.getMessage() == null ? "Unable to connect." : e.getMessage());
-                    if (status != null) status.setText("Connection error: " + (e.getMessage() == null ? "Unable to connect" : e.getMessage()));
-                    finished.run();
+                    if (!keepOld || bookings.isEmpty()) {
+                        showInbox();
+                        if (status != null) status.setText("Connection error: " + (e.getMessage() == null ? "Unable to connect" : e.getMessage()));
+                    }
                 });
             }
         });
