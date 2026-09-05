@@ -1,5 +1,6 @@
 package com.itjundobal.remoteservices.inbox;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -14,9 +15,6 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import androidx.activity.ComponentActivity;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -31,7 +29,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class MainActivity extends ComponentActivity {
+public class MainActivity extends Activity {
     private static final String API_URL = "https://remote-services.pages.dev/api/bookings";
     private static final String PREFS = "remote_services_inbox";
     private static final String KEY = "admin_key";
@@ -45,7 +43,6 @@ public class MainActivity extends ComponentActivity {
 
     private int bg = Color.rgb(7, 16, 24);
     private int panel = Color.rgb(12, 24, 34);
-    private int border = Color.rgb(27, 52, 69);
     private int cyan = Color.rgb(85, 213, 255);
     private int text = Color.rgb(237, 247, 255);
     private int muted = Color.rgb(143, 166, 182);
@@ -73,22 +70,17 @@ public class MainActivity extends ComponentActivity {
         LinearLayout box = new LinearLayout(this);
         box.setOrientation(LinearLayout.VERTICAL);
         box.setPadding(dp(4), dp(22), dp(4), dp(4));
-        box.setGravity(Gravity.CENTER_HORIZONTAL);
 
         TextView badge = label("RS", 20, cyan, true);
         badge.setGravity(Gravity.CENTER);
-        badge.setBackground(round(cyan, 48, 0x12000000));
+        badge.setBackground(round(cyan, 48, 0x22000000));
         box.addView(badge, new LinearLayout.LayoutParams(dp(58), dp(58)));
 
         TextView eyebrow = label("REMOTE SERVICES", 11, cyan, true);
         eyebrow.setLetterSpacing(0.12f);
         add(box, eyebrow, 0, 20);
-
-        TextView title = label("Inbox", 38, text, true);
-        add(box, title, 0, 8);
-
-        TextView hint = label("Owner access only. Enter your existing Admin Key to open the Inbox.", 14, muted, false);
-        add(box, hint, 0, 20);
+        add(box, label("Inbox", 38, text, true), 0, 8);
+        add(box, label("Owner access only. Enter your Admin Key to open the Inbox.", 14, muted, false), 0, 20);
 
         EditText keyInput = new EditText(this);
         keyInput.setHint("Admin Key");
@@ -128,9 +120,8 @@ public class MainActivity extends ComponentActivity {
         titles.setOrientation(LinearLayout.VERTICAL);
         TextView eyebrow = label("REMOTE SERVICES", 11, cyan, true);
         eyebrow.setLetterSpacing(0.12f);
-        TextView title = label("Inbox", 34, text, true);
         titles.addView(eyebrow);
-        titles.addView(title);
+        titles.addView(label("Inbox", 34, text, true));
         header.addView(titles, new LinearLayout.LayoutParams(0, -2, 1));
 
         TextView count = label(String.valueOf(bookings.size()), 13, cyan, true);
@@ -213,7 +204,7 @@ public class MainActivity extends ComponentActivity {
         addDetail(card, "SERVICE TYPE", b.serviceType);
         addDetail(card, "CONCERN / DETAILS", b.details);
         addDetail(card, "CONTACT METHOD", b.contactMethod);
-        addDetail(card, "CONTACT", b.contactMethod.equalsIgnoreCase("Messenger") ? b.messengerContact : b.contact);
+        addDetail(card, "CONTACT", "Messenger".equalsIgnoreCase(b.contactMethod) ? b.messengerContact : b.contact);
         addDetail(card, "EMAIL", b.email);
         addDetail(card, "PREFERRED SCHEDULE", b.preferredSchedule);
         addDetail(card, "HOME SERVICE LOCATION", b.location());
