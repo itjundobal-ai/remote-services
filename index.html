@@ -8,6 +8,15 @@
   <link rel="stylesheet" href="style.css" />
   <link rel="stylesheet" href="neon.css" />
   <link rel="stylesheet" href="modal.css" />
+  <style>
+    .anydesk-download-card{margin-top:24px;padding:18px;border:1px solid #1b3445;border-radius:18px;background:#0b1720;display:flex;align-items:center;gap:16px}
+    .anydesk-download-icon{width:58px;height:58px;flex:0 0 58px;border-radius:14px;background:#fff;padding:9px;object-fit:contain;border:1px solid #263f50}
+    .anydesk-download-copy{min-width:0;flex:1}
+    .anydesk-download-copy strong{display:block;font-size:15px;color:#eefaff;margin-bottom:4px}
+    .anydesk-download-copy small{display:block;color:#8fa6b6;line-height:1.45}
+    .anydesk-download-btn{white-space:nowrap;text-decoration:none}
+    @media(max-width:640px){.anydesk-download-card{align-items:flex-start}.anydesk-download-btn{width:100%;text-align:center}.anydesk-download-card{flex-wrap:wrap}.anydesk-download-icon{width:52px;height:52px;flex-basis:52px}}
+  </style>
 </head>
 <body>
   <div class="top-strip"><div class="container top-strip-inner"><span>MASTER GUARD REPAIR SHOP</span><span>Computer • Laptop • Cellphone • Printer • Network • Software • Website</span></div></div>
@@ -64,7 +73,16 @@
 
     <section class="section repair-list"><div class="container"><div class="section-heading"><span>PROBLEMS WE HANDLE</span><h2>From small fixes to complete setup</h2></div><div class="repair-grid"><div><b>Computer & Laptop</b><p>Slow, no display, overheating, startup errors, Windows problems, blue screen, drivers, upgrades, cleanup, SSD/RAM installation and setup.</p></div><div><b>Printer</b><p>Not printing, offline, paper jam, faded print, driver problems, Wi-Fi connection, USB setup, sharing, scanner problems and installation.</p></div><div><b>Cellphone</b><p>New phone setup, slow phone, app installation, updates, backup, storage problems, connectivity and basic troubleshooting.</p></div><div><b>Network</b><p>No internet, weak Wi-Fi, router setup, LAN configuration, printer networking, device connection and basic network troubleshooting.</p></div><div><b>Website & System</b><p>Business website, landing page, online booking, simple management system, forms, database-connected pages and website updates.</p></div><div><b>Software & Office</b><p>Windows setup, drivers, Microsoft Office, PDF tools, engineering/design applications and other legitimate software installation.</p></div></div></div></section>
 
-    <section id="booking" class="section booking-section"><div class="container booking-grid"><div><div class="section-heading"><span>BOOK A REPAIR</span><h2>Tell us what you need fixed</h2></div><p>Select a service above and choose the problem from the repair menu. If your problem is not listed, simply choose <strong>Others</strong> and describe it.</p><div class="quick-contact"><span>✓ Remote support available</span><span>✓ Home service available</span><span>✓ Clear service pricing</span></div></div>
+    <section id="booking" class="section booking-section"><div class="container booking-grid"><div><div class="section-heading"><span>BOOK A REPAIR</span><h2>Tell us what you need fixed</h2></div><p>Select a service above and choose the problem from the repair menu. If your problem is not listed, simply choose <strong>Others</strong> and describe it.</p><div class="quick-contact"><span>✓ Remote support available</span><span>✓ Home service available</span><span>✓ Clear service pricing</span></div>
+      <div class="anydesk-download-card">
+        <img class="anydesk-download-icon" src="https://anydesk.com/_static/img/logos/anydesk-logo.svg" alt="AnyDesk logo" />
+        <div class="anydesk-download-copy">
+          <strong>Need Remote Support?</strong>
+          <small>Install AnyDesk first. Click the button and the official AnyDesk Windows installer will download.</small>
+        </div>
+        <a class="btn anydesk-download-btn" href="https://download.anydesk.com/AnyDesk.exe">DOWNLOAD ANYDESK</a>
+      </div>
+    </div>
       <form id="bookingForm" class="form">
         <label>Full name<input id="name" name="name" type="text" maxlength="100" required placeholder="Your name" /></label>
         <div class="contact-choice"><div class="phone-choice"><label>Phone number<input id="contact" name="contact" type="tel" maxlength="30" required placeholder="09XXXXXXXXX" /></label></div><div class="messenger-choice"><span class="choice-label">Prefer Facebook?</span><a class="btn messenger-btn" href="https://www.facebook.com/MasterGuardOfficial" target="_blank" rel="noopener">OPEN MASTER GUARD PAGE</a><small>Send your message directly through the Master Guard Facebook Page.</small></div></div>
