@@ -1,0 +1,5 @@
+plugins { id 'com.android.application' }
+
+android { namespace 'com.itjundobal.remoteservices.inbox'; compileSdk 36
+    defaultConfig { applicationId 'com.itjundobal.remoteservices.inbox'; minSdk 24; targetSdk 36; versionCode 1; versionName '1.0' }
+}
