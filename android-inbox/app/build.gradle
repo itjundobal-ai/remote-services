@@ -1,5 +1,17 @@
-plugins { id 'com.android.application' }
+plugins {
+    id 'com.android.application'
+}
 
-android { namespace 'com.itjundobal.remoteservices.inbox'; compileSdk 36
-    defaultConfig { applicationId 'com.itjundobal.remoteservices.inbox'; minSdk 24; targetSdk 36; versionCode 1; versionName '1.0' }
+android {
+    namespace 'com.itjundobal.remoteservices.inbox'
+    compileSdk 35
+
+    defaultConfig {
+        applicationId 'com.itjundobal.remote.services.inbox'
+        minSdk 23
+        targetSdk 35
+        versionCode 1
+        versionName '1.0'
+        buildConfigField 'String', 'ADMIN_KEY', '"' + (project.findProperty('ADMIN_KEY') ?: '') + '"'
+    }
 }
