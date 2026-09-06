@@ -3,8 +3,12 @@ package com.itjundobal.remoteservices.inbox;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
+import android.media.AudioManager;
+import android.media.ToneGenerator;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
@@ -21,19 +25,26 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class MainActivity extends Activity {
     private static final String API_URL = "https://remote-services.pages.dev/api/bookings";
     private static final String AUTO_ADMIN_KEY = BuildConfig.ADMIN_KEY;
+    private static final long POLL_INTERVAL_MS = 15000L;
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final Handler handler = new Handler(Looper.getMainLooper());
     private final List<Booking> bookings = new ArrayList<>();
+    private final Set<String> knownReferences = new HashSet<>();
     private LinearLayout root;
     private LinearLayout list;
     private TextView status;
+    private boolean firstSuccessfulLoad = true;
+    private ToneGenerator toneGenerator;
 
     private int bg = Color.rgb(7, 16, 24);
     private int panel = Color.rgb(12, 24, 34);
@@ -41,12 +52,43 @@ public class MainActivity extends Activity {
     private int text = Color.rgb(237, 247, 255);
     private int muted = Color.rgb(143, 166, 182);
 
+    private final Runnable pollRunnable = new Runnable() {
+        @Override public void run() {
+            if (!isFinishing()) {
+                loadBookings(true);
+                handler.postDelayed(this, POLL_INTERVAL_MS);
+            }
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().setStatusBarColor(bg);
         getWindow().setNavigationBarColor(bg);
+        try { toneGenerator = new ToneGenerator(AudioManager.STREAM_NOTIFICATION, 90); } catch (Exception ignored) {}
         loadBookings(false);
+    }
+
+    @Override protected void onResume() {
+        super.onResume();
+        handler.removeCallbacks(pollRunnable);
+        handler.postDelayed(pollRunnable, POLL_INTERVAL_MS);
+    }
+
+    @Override protected void onPause() {
+        handler.removeCallbacks(pollRunnable);
+        super.onPause();
+    }
+
+    private void playNewBookingTone() {
+        if (toneGenerator == null) return;
+        try {
+            toneGenerator.startTone(ToneGenerator.TONE_PROP_BEEP, 180);
+            handler.postDelayed(() -> {
+                if (toneGenerator != null) toneGenerator.startTone(ToneGenerator.TONE_PROP_ACK, 220);
+            }, 230);
+        } catch (Exception ignored) {}
     }
 
     private void base() {
@@ -205,9 +247,25 @@ public class MainActivity extends Activity {
                 JSONArray arr = data.optJSONArray("bookings");
                 List<Booking> next = new ArrayList<>();
                 if (arr != null) for (int i = 0; i < arr.length(); i++) next.add(Booking.from(arr.getJSONObject(i)));
+
+                final List<String> newReferences = new ArrayList<>();
+                if (!firstSuccessfulLoad) {
+                    for (Booking b : next) {
+                        String ref = safe(b.reference);
+                        if (!ref.isEmpty() && !knownReferences.contains(ref)) newReferences.add(ref);
+                    }
+                }
+                knownReferences.clear();
+                for (Booking b : next) if (!safe(b.reference).isEmpty()) knownReferences.add(b.reference);
+                firstSuccessfulLoad = false;
+
                 runOnUiThread(() -> {
                     bookings.clear(); bookings.addAll(next);
                     showInbox();
+                    if (!newReferences.isEmpty()) {
+                        playNewBookingTone();
+                        if (status != null) status.setText("🔔 New booking received");
+                    }
                 });
             } catch (Exception e) {
                 runOnUiThread(() -> {
@@ -224,7 +282,12 @@ public class MainActivity extends Activity {
         try { return new JSONObject(body).optString("error", fallback); } catch (Exception ignored) { return fallback; }
     }
 
-    @Override protected void onDestroy() { super.onDestroy(); executor.shutdownNow(); }
+    @Override protected void onDestroy() {
+        handler.removeCallbacksAndMessages(null);
+        if (toneGenerator != null) { toneGenerator.release(); toneGenerator = null; }
+        executor.shutdownNow();
+        super.onDestroy();
+    }
 
     private Button button(String s, int bgColor, int fg) {
         Button b = new Button(this);
