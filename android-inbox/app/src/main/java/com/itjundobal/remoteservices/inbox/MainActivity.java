@@ -27,7 +27,7 @@ import java.util.concurrent.Executors;
 
 public class MainActivity extends Activity {
     private static final String API_URL = "https://remote-services.pages.dev/api/bookings";
-    private static final String AUTO_ADMIN_KEY = "RS-INBOX-2026-09";
+    private static final String AUTO_ADMIN_KEY = BuildConfig.ADMIN_KEY;
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private final List<Booking> bookings = new ArrayList<>();
