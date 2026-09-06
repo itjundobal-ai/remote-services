@@ -119,3 +119,27 @@ export async function onRequestPatch({ request, env }) {
     .bind(status, new Date().toISOString(), id).run();
   return json({ ok: true });
 }
+
+export async function onRequestDelete({ request, env }) {
+  if (!authorized(request, env)) return json({ error: 'Unauthorized' }, 401);
+  if (!env.DB) return json({ error: 'Booking database is not connected yet.' }, 503);
+  await ensureTable(env.DB);
+
+  let body = {};
+  try { body = await request.json(); } catch {}
+
+  const id = body.id == null ? null : Number(body.id);
+  const clearAll = body.all === true;
+
+  if (!clearAll && (!Number.isInteger(id) || id < 1)) {
+    return json({ error: 'Provide a valid booking id or all: true.' }, 400);
+  }
+
+  if (clearAll) {
+    await env.DB.prepare(`DELETE FROM bookings`).run();
+    return json({ ok: true, deleted: 'all' });
+  }
+
+  const result = await env.DB.prepare(`DELETE FROM bookings WHERE id = ?`).bind(id).run();
+  return json({ ok: true, deleted: id, changes: result.meta?.changes ?? null });
+}
