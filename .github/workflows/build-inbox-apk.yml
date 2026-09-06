@@ -19,14 +19,14 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '9.3.1'
+          gradle-version: '9.5.0'
 
       - name: Build APK
         env:
           ADMIN_KEY: ${{ secrets.ADMIN_KEY }}
         run: |
           cd android-inbox
-          gradle assembleDebug -PADMIN_KEY="$ADMIN_KEY"
+          gradle assembleDebug -PADMIN_KEY="$ADMIN_KEY" --no-daemon
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
