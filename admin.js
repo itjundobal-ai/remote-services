@@ -119,29 +119,47 @@ function showLongPressMenu(article) {
 function attachLongPress(article) {
   let timer = null;
   let longPressed = false;
-  const delay = 650;
+  let startX = 0;
+  let startY = 0;
+  const delay = 800;
+  const movementLimit = 18;
 
-  const start = (event) => {
-    if (event.target.closest('button, a, select, input, textarea')) return;
-    longPressed = false;
-    timer = setTimeout(() => {
-      longPressed = true;
-      showLongPressMenu(article);
-      if (navigator.vibrate) navigator.vibrate(40);
-    }, delay);
-  };
-
-  const cancel = () => {
+  const clearTimer = () => {
     if (timer) clearTimeout(timer);
     timer = null;
   };
 
-  article.addEventListener('touchstart', start, { passive: true });
-  article.addEventListener('touchend', cancel, { passive: true });
-  article.addEventListener('touchcancel', cancel, { passive: true });
-  article.addEventListener('mousedown', start);
-  article.addEventListener('mouseup', cancel);
-  article.addEventListener('mouseleave', cancel);
+  const start = (event) => {
+    if (event.target.closest('button, a, select, input, textarea')) return;
+    clearTimer();
+    longPressed = false;
+    startX = event.clientX ?? 0;
+    startY = event.clientY ?? 0;
+
+    timer = setTimeout(() => {
+      timer = null;
+      longPressed = true;
+      showLongPressMenu(article);
+      if (navigator.vibrate) navigator.vibrate([40]);
+    }, delay);
+  };
+
+  const move = (event) => {
+    if (!timer) return;
+    const x = event.clientX ?? startX;
+    const y = event.clientY ?? startY;
+    if (Math.hypot(x - startX, y - startY) > movementLimit) clearTimer();
+  };
+
+  const end = () => {
+    clearTimer();
+  };
+
+  article.addEventListener('pointerdown', start, { passive: true });
+  article.addEventListener('pointermove', move, { passive: true });
+  article.addEventListener('pointerup', end, { passive: true });
+  article.addEventListener('pointercancel', end, { passive: true });
+  article.addEventListener('pointerleave', end, { passive: true });
   article.addEventListener('contextmenu', event => {
     event.preventDefault();
     showLongPressMenu(article);
@@ -162,7 +180,7 @@ function render(bookings) {
       : (item.contact || 'Not provided');
 
     return `
-    <article class="booking-item" data-id="${item.id}" style="-webkit-user-select:none;user-select:none;">
+    <article class="booking-item" data-id="${item.id}" style="-webkit-user-select:none;user-select:none;touch-action:manipulation;">
       <div class="booking-meta"><span>${escapeHtml(item.reference)}</span><span>•</span><span>${escapeHtml(formatDate(item.created_at))}</span><span>•</span><span class="status">${escapeHtml(item.status)}</span></div>
       <h3>${escapeHtml(item.name)} — ${escapeHtml(item.service)}</h3>
       <p><strong>Preferred contact:</strong> ${escapeHtml(method)}<br>
@@ -176,7 +194,7 @@ function render(bookings) {
         </select>
         ${contactActions(item)}
         ${mapLink(item)}
-        <span style="opacity:.65;font-size:.85em;">Long press to delete</span>
+        <span style="opacity:.75;font-size:.85em;font-weight:600;">Press and hold this booking to delete</span>
       </div>
     </article>
   `;
