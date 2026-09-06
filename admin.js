@@ -10,6 +10,7 @@ const searchInput = document.getElementById('searchInput');
 const statusFilter = document.getElementById('statusFilter');
 const typeFilter = document.getElementById('typeFilter');
 const refreshBtn = document.getElementById('refreshBtn');
+const clearAllBtn = document.getElementById('clearAllBtn');
 const logoutBtn = document.getElementById('logoutBtn');
 
 let adminKey = sessionStorage.getItem('remote_services_admin_key') || '';
@@ -110,6 +111,7 @@ function render(bookings) {
         </select>
         ${contactActions(item)}
         ${mapLink(item)}
+        <button type="button" class="deleteBookingBtn" data-id="${item.id}">Delete</button>
       </div>
     </article>
   `;
@@ -130,6 +132,22 @@ function render(bookings) {
       }
     });
     select.dataset.current = select.value;
+  });
+
+  document.querySelectorAll('.deleteBookingBtn').forEach(button => {
+    button.addEventListener('click', async () => {
+      const item = allBookings.find(booking => Number(booking.id) === Number(button.dataset.id));
+      if (!item) return;
+      if (!confirm(`Delete booking ${item.reference} for ${item.name}? This cannot be undone.`)) return;
+      button.disabled = true;
+      try {
+        await api('', { method: 'DELETE', body: JSON.stringify({ id: Number(button.dataset.id) }) });
+        await loadBookings();
+      } catch (error) {
+        alert(error.message);
+        button.disabled = false;
+      }
+    });
   });
 }
 
@@ -185,6 +203,20 @@ searchInput.addEventListener('input', applyFilters);
 statusFilter.addEventListener('change', applyFilters);
 typeFilter.addEventListener('change', applyFilters);
 refreshBtn.addEventListener('click', () => loadBookings().catch(e => alert(e.message)));
+clearAllBtn.addEventListener('click', async () => {
+  if (!allBookings.length) return;
+  if (!confirm(`DELETE ALL ${allBookings.length} BOOKINGS? This cannot be undone.`)) return;
+  if (!confirm('FINAL CONFIRMATION: Clear the entire booking inbox?')) return;
+  clearAllBtn.disabled = true;
+  try {
+    await api('', { method: 'DELETE', body: JSON.stringify({ all: true }) });
+    await loadBookings();
+  } catch (error) {
+    alert(error.message);
+  } finally {
+    clearAllBtn.disabled = false;
+  }
+});
 logoutBtn.addEventListener('click', () => {
   adminKey = '';
   allBookings = [];
