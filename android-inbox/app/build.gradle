@@ -6,6 +6,10 @@ android {
     namespace 'com.itjundobal.remoteservices.inbox'
     compileSdk 35
 
+    buildFeatures {
+        buildConfig true
+    }
+
     defaultConfig {
         applicationId 'com.itjundobal.remote.services.inbox'
         minSdk 23
