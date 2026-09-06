@@ -83,6 +83,71 @@ function contactActions(item) {
   return actions.join('');
 }
 
+async function deleteBooking(id, triggerButton = null) {
+  const item = allBookings.find(booking => Number(booking.id) === Number(id));
+  if (!item) return;
+  if (!confirm(`Delete booking ${item.reference} for ${item.name}? This cannot be undone.`)) return;
+
+  if (triggerButton) triggerButton.disabled = true;
+  try {
+    await api('', { method: 'DELETE', body: JSON.stringify({ id: Number(id) }) });
+    await loadBookings();
+  } catch (error) {
+    alert(error.message);
+    if (triggerButton) triggerButton.disabled = false;
+  }
+}
+
+function showLongPressMenu(article) {
+  document.querySelectorAll('.longPressMenu').forEach(menu => menu.remove());
+
+  const menu = document.createElement('div');
+  menu.className = 'longPressMenu';
+  menu.innerHTML = `
+    <button type="button" class="longPressDelete">🗑️ Delete booking</button>
+    <button type="button" class="longPressCancel">Cancel</button>
+  `;
+  menu.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;padding:10px;border-radius:10px;background:rgba(0,0,0,.08);';
+
+  article.appendChild(menu);
+  menu.querySelector('.longPressDelete').addEventListener('click', () => {
+    deleteBooking(article.dataset.id, menu.querySelector('.longPressDelete'));
+  });
+  menu.querySelector('.longPressCancel').addEventListener('click', () => menu.remove());
+}
+
+function attachLongPress(article) {
+  let timer = null;
+  let longPressed = false;
+  const delay = 650;
+
+  const start = (event) => {
+    if (event.target.closest('button, a, select, input, textarea')) return;
+    longPressed = false;
+    timer = setTimeout(() => {
+      longPressed = true;
+      showLongPressMenu(article);
+      if (navigator.vibrate) navigator.vibrate(40);
+    }, delay);
+  };
+
+  const cancel = () => {
+    if (timer) clearTimeout(timer);
+    timer = null;
+  };
+
+  article.addEventListener('touchstart', start, { passive: true });
+  article.addEventListener('touchend', cancel, { passive: true });
+  article.addEventListener('touchcancel', cancel, { passive: true });
+  article.addEventListener('mousedown', start);
+  article.addEventListener('mouseup', cancel);
+  article.addEventListener('mouseleave', cancel);
+  article.addEventListener('contextmenu', event => {
+    event.preventDefault();
+    showLongPressMenu(article);
+  });
+}
+
 function render(bookings) {
   bookingCount.textContent = `${bookings.length} matching booking${bookings.length === 1 ? '' : 's'}`;
   if (!bookings.length) {
@@ -97,7 +162,7 @@ function render(bookings) {
       : (item.contact || 'Not provided');
 
     return `
-    <article class="booking-item" data-id="${item.id}">
+    <article class="booking-item" data-id="${item.id}" style="-webkit-user-select:none;user-select:none;">
       <div class="booking-meta"><span>${escapeHtml(item.reference)}</span><span>•</span><span>${escapeHtml(formatDate(item.created_at))}</span><span>•</span><span class="status">${escapeHtml(item.status)}</span></div>
       <h3>${escapeHtml(item.name)} — ${escapeHtml(item.service)}</h3>
       <p><strong>Preferred contact:</strong> ${escapeHtml(method)}<br>
@@ -111,11 +176,13 @@ function render(bookings) {
         </select>
         ${contactActions(item)}
         ${mapLink(item)}
-        <button type="button" class="deleteBookingBtn" data-id="${item.id}">Delete</button>
+        <span style="opacity:.65;font-size:.85em;">Long press to delete</span>
       </div>
     </article>
   `;
   }).join('');
+
+  document.querySelectorAll('.booking-item').forEach(attachLongPress);
 
   document.querySelectorAll('.statusSelect').forEach(select => {
     select.addEventListener('change', async () => {
@@ -132,22 +199,6 @@ function render(bookings) {
       }
     });
     select.dataset.current = select.value;
-  });
-
-  document.querySelectorAll('.deleteBookingBtn').forEach(button => {
-    button.addEventListener('click', async () => {
-      const item = allBookings.find(booking => Number(booking.id) === Number(button.dataset.id));
-      if (!item) return;
-      if (!confirm(`Delete booking ${item.reference} for ${item.name}? This cannot be undone.`)) return;
-      button.disabled = true;
-      try {
-        await api('', { method: 'DELETE', body: JSON.stringify({ id: Number(button.dataset.id) }) });
-        await loadBookings();
-      } catch (error) {
-        alert(error.message);
-        button.disabled = false;
-      }
-    });
   });
 }
 
